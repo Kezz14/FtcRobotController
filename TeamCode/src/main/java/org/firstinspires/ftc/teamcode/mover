@@ -1,0 +1,390 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
+
+@TeleOp(name = "RunMotors (Blocks to Java)")
+public class RunMotors extends LinearOpMode {
+
+  private DcMotor baseMotor;
+  private DcMotor flipMotor;
+
+  String Func;
+  int Flip_Target;
+  int BaseTarget;
+  String A;
+  String Moves;
+  String B;
+  double Base_Motor_Rotation;
+  int NumbMoves;
+  String X;
+  int MoveNumb;
+
+  /**
+   * Describe this function...
+   */
+  private void Base_Continuous() {
+    Func = "Base Continuous";
+    while (opModeIsActive()) {
+      Telemetry2();
+      Toggle_A_and_B();
+      if (X.equals("True")) {
+        break;
+      }
+      baseMotor.setPower(1 * gamepad1.left_stick_x);
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Set_Pos() {
+    Func = "Flip";
+    flipMotor.setTargetPosition(Flip_Target);
+    flipMotor.setPower(0);
+    flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    while (opModeIsActive()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Controller_Arm() {
+    Func = "Flip";
+    flipMotor.setTargetPosition(0);
+    while (opModeIsActive()) {
+      Telemetry2();
+      Toggle_A_and_B();
+      if (X.equals("True")) {
+        break;
+      }
+      if (A.equals("True")) {
+        Run_Flip_Sequence(25);
+        Run_Flip_Sequence(90);
+        Run_Flip_Sequence(25);
+      }
+      if (B.equals("True")) {
+        Run_Flip_Sequence(0);
+      }
+      Update_Arm();
+    }
+    baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Controller_Base() {
+    Func = "Base";
+    while (opModeIsActive()) {
+      Telemetry2();
+      Update_Base();
+      Toggle_A_and_B();
+      if (X.equals("True")) {
+        break;
+      }
+      if (A.equals("True")) {
+        BaseTarget += Base_Motor_Rotation;
+      }
+      if (B.equals("True")) {
+        BaseTarget += -Base_Motor_Rotation;
+      }
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Run_Moves() {
+    Func = "Run Moves";
+    while (opModeIsActive()) {
+      Telemetry2();
+      if (MoveNumb <= NumbMoves) {
+        if ("D".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          CheckMove2("D");
+        } else if ("B".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          Flip_Cube();
+          CheckMove2("B");
+          Flip_Cube();
+          Flip_Cube();
+          Flip_Cube();
+        } else if ("U".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          Flip_Cube();
+          Flip_Cube();
+          CheckMove2("U");
+          Flip_Cube();
+          Flip_Cube();
+        } else if ("F".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          Rotate_Cube_CW();
+          Rotate_Cube_CW();
+          Flip_Cube();
+          CheckMove2("F");
+          Rotate_Cube_CW();
+          Rotate_Cube_CW();
+          Flip_Cube();
+        } else if ("R".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          Rotate_Cube_CCW();
+          Flip_Cube();
+          CheckMove2("R");
+          Rotate_Cube_CCW();
+          Rotate_Cube_CCW();
+          Flip_Cube();
+          Rotate_Cube_CCW();
+        } else if ("L".equals(JavaUtil.inTextGetLetter(Moves, JavaUtil.AtMode.FROM_START, ((1 + 2 * MoveNumb) - 1)))) {
+          Rotate_Cube_CW();
+          Flip_Cube();
+          CheckMove2("L");
+          Rotate_Cube_CW();
+          Rotate_Cube_CW();
+          Flip_Cube();
+          Rotate_Cube_CW();
+        }
+      } else {
+        Arm_Up();
+        break;
+      }
+      MoveNumb += 1;
+    }
+  }
+
+  /**
+   * This sample contains the bare minimum Blocks for any regular OpMode. The 3 blue
+   * Comment Blocks show where to place Initialization code (runs once, after touching the
+   * DS INIT button, and before touching the DS Start arrow), Run code (runs once, after
+   * touching Start), and Loop code (runs repeatedly while the OpMode is active, namely not
+   * Stopped).
+   */
+  @Override
+  public void runOpMode() {
+    boolean TOGGLE;
+
+    baseMotor = hardwareMap.get(DcMotor.class, "baseMotor");
+    flipMotor = hardwareMap.get(DcMotor.class, "flipMotor");
+
+    // Put initialization blocks here.
+    waitForStart();
+    Moves = "L2D F'U2D2B'L2B2U'F2U'D F2L2U2R2";
+    NumbMoves = Moves.length() / 2;
+    MoveNumb = 0;
+    Func = "Err";
+    TOGGLE = true;
+    BaseTarget = 0;
+    Flip_Target = 0;
+    A = "False";
+    B = "False";
+    X = "False";
+    Base_Motor_Rotation = 146.5;
+    baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    ((DcMotorEx) baseMotor).setTargetPositionTolerance(50);
+    flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    ((DcMotorEx) flipMotor).setTargetPositionTolerance(1);
+    if (opModeIsActive()) {
+      while (opModeIsActive()) {
+        Controller_Arm();
+        Run_Moves();
+      }
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Toggle_A_and_B() {
+    if (gamepad1.a) {
+      A = "Hold";
+    } else if (A.equals("Hold")) {
+      A = "True";
+    } else if (A.equals("True")) {
+      A = "False";
+    }
+    if (gamepad1.b) {
+      B = "Hold";
+    } else if (B.equals("Hold")) {
+      B = "True";
+    } else if (B.equals("True")) {
+      B = "False";
+    }
+    if (gamepad1.x) {
+      X = "Hold";
+    } else if (X.equals("Hold")) {
+      X = "True";
+    } else if (X.equals("True")) {
+      X = "False";
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Update_Arm() {
+    flipMotor.setTargetPosition(Flip_Target);
+    flipMotor.setPower(1);
+    flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Telemetry2() {
+    telemetry.addData("Controls: ", Func);
+    telemetry.addData("Next Function: ", "X");
+    if (Func.equals("Base")) {
+      telemetry.addData("Base: ", "A B");
+      telemetry.addData("Base Pos =", baseMotor.getCurrentPosition());
+      telemetry.addData("Base Target =", baseMotor.getTargetPosition());
+    }
+    if (Func.equals("Flip")) {
+      telemetry.addData("Flip: ", "A B");
+      telemetry.addData("Flip Pos = ", flipMotor.getCurrentPosition());
+      telemetry.addData("Flip Target =", flipMotor.getTargetPosition());
+      telemetry.addData("Is Motor Busy: ", flipMotor.isBusy());
+    }
+    if (Func.equals("Base Continuous")) {
+      telemetry.addData("Base Continuous: ", "Left Stick");
+      telemetry.addData("Base Pos =", baseMotor.getCurrentPosition());
+    }
+    if (Func.equals("Run Moves")) {
+      telemetry.addData("Current Move", MoveNumb);
+      telemetry.addData("Motor", baseMotor.isBusy());
+      telemetry.addData("Base Target =", baseMotor.getTargetPosition());
+      telemetry.addData("Move", JavaUtil.inTextGetSubstring(Moves, JavaUtil.AtMode.FROM_START, ((2 * MoveNumb + 1) - 1), JavaUtil.AtMode.FROM_START, ((2 * MoveNumb + 2) - 1)));
+    }
+    telemetry.update();
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Update_Base() {
+    baseMotor.setTargetPosition(BaseTarget);
+    baseMotor.setPower(0.5);
+    baseMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private boolean CheckMove(String Notation) {
+    if (Notation.equals(JavaUtil.inTextGetSubstring(Moves, JavaUtil.AtMode.FROM_START, ((2 * MoveNumb + 1) - 1), JavaUtil.AtMode.FROM_START, ((2 * MoveNumb + 2) - 1)))) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Arm_Down() {
+    Run_Flip_Sequence(50);
+    Run_Flip_Sequence(30);
+    Run_Flip_Sequence(45);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void CheckMove2(String Side) {
+    if (CheckMove(Side + " ")) {
+      Turn_Face_CW();
+    } else if (CheckMove(Side + "'")) {
+      Turn_Face_CCW();
+    } else if (CheckMove(Side + "2")) {
+      Turn_Face_X2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Run_Flip_Sequence(int Target) {
+    Flip_Target = Target;
+    Update_Arm();
+    while (flipMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Arm_Up() {
+    Run_Flip_Sequence(0);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Flip_Cube() {
+    Run_Flip_Sequence(24);
+    Run_Flip_Sequence(90);
+    Run_Flip_Sequence(24);
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Turn_Face_CW() {
+    Arm_Down();
+    BaseTarget += Base_Motor_Rotation;
+    Update_Base();
+    while (baseMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Turn_Face_CCW() {
+    Arm_Down();
+    BaseTarget += -Base_Motor_Rotation;
+    Update_Base();
+    while (baseMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Turn_Face_X2() {
+    Arm_Down();
+    BaseTarget += Base_Motor_Rotation;
+    BaseTarget += Base_Motor_Rotation;
+    Update_Base();
+    while (baseMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Rotate_Cube_CW() {
+    Arm_Up();
+    BaseTarget += -Base_Motor_Rotation;
+    Update_Base();
+    while (baseMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+
+  /**
+   * Describe this function...
+   */
+  private void Rotate_Cube_CCW() {
+    Arm_Up();
+    BaseTarget += Base_Motor_Rotation;
+    Update_Base();
+    while (baseMotor.isBusy()) {
+      Telemetry2();
+    }
+  }
+}
