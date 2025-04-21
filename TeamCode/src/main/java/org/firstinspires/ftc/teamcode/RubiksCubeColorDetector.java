@@ -23,17 +23,17 @@ public class RubiksCubeColorDetector extends LinearOpMode {
 
     // Scanning regions (9 squares per face)
     private static final ImageRegion[] REGIONS = {
-            ImageRegion.asUnityCenterCoordinates(-0.9f, 0.9f, -0.5f, 0.5f),   // Top-left
-            ImageRegion.asUnityCenterCoordinates(-0.2f, 0.9f, 0.2f, 0.5f),    // Top-center
-            ImageRegion.asUnityCenterCoordinates(0.5f, 0.9f, 0.9f, 0.5f),     // Top-right
+            ImageRegion.asUnityCenterCoordinates(-0.7f, 0.7f, -0.4f, 0.4f),   // Top-left
+            ImageRegion.asUnityCenterCoordinates(-0.2f, 0.7f, 0.1f, 0.4f),    // Top-center
+            ImageRegion.asUnityCenterCoordinates(0.35f, 0.7f, 0.6f, 0.4f),     // Top-right
 
-            ImageRegion.asUnityCenterCoordinates(-0.9f, 0.3f, -0.5f, -0.3f),   // Middle-left
-            ImageRegion.asUnityCenterCoordinates(-0.2f, 0.3f, 0.2f, -0.3f),    // Center
-            ImageRegion.asUnityCenterCoordinates(0.5f, 0.3f, 0.9f, -0.3f),     // Middle-right
+            ImageRegion.asUnityCenterCoordinates(-0.7f, 0.05f, -0.4f, -0.3f),   // Middle-left
+            ImageRegion.asUnityCenterCoordinates(-0.2f, 0.05f, 0.1f, -0.3f),    // Center
+            ImageRegion.asUnityCenterCoordinates(0.35f, 0.05f, 0.6f, -0.3f),     // Middle-right
 
-            ImageRegion.asUnityCenterCoordinates(-0.9f, -0.5f, -0.5f, -0.9f),  // Bottom-left
-            ImageRegion.asUnityCenterCoordinates(-0.2f, -0.5f, 0.2f, -0.9f),   // Bottom-center
-            ImageRegion.asUnityCenterCoordinates(0.5f, -0.5f, 0.9f, -0.9f)     // Bottom-right
+            ImageRegion.asUnityCenterCoordinates(-0.7f, -0.65f, -0.4f, -0.85f),  // Bottom-left
+            ImageRegion.asUnityCenterCoordinates(-0.2f, -0.65f, 0.1f, -0.85f),   // Bottom-center
+            ImageRegion.asUnityCenterCoordinates(0.35f, -0.65f, 0.6f, -0.85f)     // Bottom-right
     };
 
 
@@ -76,11 +76,15 @@ public class RubiksCubeColorDetector extends LinearOpMode {
         // Build VisionPortal
         portal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
+                .setCameraResolution(new Size(1280, 960))
                 .addProcessors(processors)
                 .build();
 
         // Configure camera settings
+        while (!VisionPortal.CameraState.STREAMING.equals(portal.getCameraState())) {
+            telemetry.addLine("Waiting");
+            telemetry.update();
+        }
         configureCamera();
 
         telemetry.addData("Status", "Ready - Press Start");
@@ -234,9 +238,9 @@ public class RubiksCubeColorDetector extends LinearOpMode {
     }
 
     private boolean isPureWhite(int r, int g, int b) {
-        return r > 240 && g > 240 && b > 240 &&
-                Math.abs(r-g) < 15 &&
-                Math.abs(r-b) < 15;
+        return r > 220 && g > 220 && b > 220 &&
+                Math.abs(r-g) < 35 &&
+                Math.abs(r-b) < 35;
     }
 
     private boolean isDefinitelyYellow(int r, int g, int b) {
@@ -245,7 +249,7 @@ public class RubiksCubeColorDetector extends LinearOpMode {
 
         boolean byHue = hsv[0] >= 40 && hsv[0] <= 70;
         boolean byRGB = (r > 180 && g > 180 && b < 120) && (g - b > 50);
-        boolean notWhite = !(r > 230 && g > 230 && b > 230);
+        boolean notWhite = !(r > 260 && g > 260 && b > 260);
 
         return byHue || (byRGB && notWhite);
     }
