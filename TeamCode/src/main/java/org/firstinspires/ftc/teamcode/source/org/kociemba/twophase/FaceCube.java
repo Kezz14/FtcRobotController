@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.source.org.kociemba.twophase;
 
-import static org.kociemba.twophase.Color.*;
-import static org.kociemba.twophase.Corner.*;
-import static org.kociemba.twophase.Edge.*;
-import static org.kociemba.twophase.Facelet.*;
+
+import static org.firstinspires.ftc.teamcode.source.org.kociemba.twophase.Color.*;
+import static org.firstinspires.ftc.teamcode.source.org.kociemba.twophase.Corner.*;
+import static org.firstinspires.ftc.teamcode.source.org.kociemba.twophase.Edge.*;
+import static org.firstinspires.ftc.teamcode.source.org.kociemba.twophase.Facelet.*;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Cube on the facelet level
